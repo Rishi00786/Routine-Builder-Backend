@@ -27,7 +27,7 @@ export class RoutinesService {
         imagePreview: plainRoutine.imagePreview,
         steps: plainSteps,
         benefits: plainRoutine.benefits,
-        preBuilt: plainRoutine.preBuilt ? plainRoutine.preBuilt : false,
+        preBuilt: plainRoutine.preBuilt ?? false,
       },
     });
   }
