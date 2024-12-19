@@ -12,3 +12,17 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model Routines {
+  id           String   @id @default(uuid())
+  name         String   @unique
+  duration     String
+  description  String   @db.Text
+  milestones   String
+  imagePreview String   @db.Text
+  steps        Json
+  benefits     Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
