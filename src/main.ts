@@ -13,7 +13,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: ['http://localhost:5173'],
+    origin: ['http://localhost:5173', 'https://routine-creation.vercel.app/'],
     methods: 'POST'.split(','),
     credentials: true,
     allowedHeaders: 'Content-Type,Authorization',
