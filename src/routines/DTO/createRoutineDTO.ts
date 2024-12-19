@@ -6,6 +6,7 @@ import {
   IsUrl,
   IsNotEmpty,
   IsObject,
+  IsBoolean,
 } from 'class-validator';
 
 class ProductDTO {
@@ -56,4 +57,8 @@ export class CreateRoutineDTO {
   @IsArray()
   @IsString({ each: true })
   benefits: string[];
+
+  @IsBoolean()
+  @IsOptional()
+  preBuilt?: boolean;
 }
