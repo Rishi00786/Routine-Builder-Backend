@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { CreateRoutineDTO } from './DTO/createRoutineDTO';
 import { plainToClass } from 'class-transformer';
@@ -38,5 +38,37 @@ export class RoutinesService {
 
   async getRoutineById(id: string) {
     return await this.databaseServices.routines.findUnique({ where: { id } });
+  }
+
+  async assignRoutineToUser(userId: string, routineId: string) {
+    const routine = await this.databaseServices.routines.findUnique({
+      where: { id: routineId },
+    });
+
+    if (!routine) {
+      throw new NotFoundException('Routine not found');
+    }
+
+    await this.databaseServices.routinesOnUsers.upsert({
+      where: { userId_routineId: { userId, routineId } },
+      update: { assignedAt: new Date() },
+      create: { userId, routineId, assignedAt: new Date() },
+    });
+
+    return { message: 'Routine successfully assigned to user' };
+  }
+
+  async getUserRoutines(userId: string) {
+    console.log('User ID:', userId); // Log userId
+    const routines = await this.databaseServices.routines.findMany({
+      where: {
+        users: {
+          some: { userId },
+        },
+      },
+    });
+
+    console.log('Routines found:', routines); // Log routines found
+    return routines || [];
   }
 }
