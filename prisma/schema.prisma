@@ -46,6 +46,10 @@ model RoutinesOnUsers {
   routineId  String
   assignedAt DateTime @default(now())
 
+  completed     Boolean   @default(false)
+  progress      Int       @default(0)
+  completedTasks Json?
+
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   routine    Routines  @relation(fields: [routineId], references: [id], onDelete: Cascade)
 
