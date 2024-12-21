@@ -189,4 +189,60 @@ export class RoutinesService {
     // console.log(routineOnUser);
     return routineOnUser;
   }
+
+  async getEngagementInsights() {
+    const totalCompletions = await this.databaseServices.routinesOnUsers.count({
+      where: { completed: true },
+    });
+
+    // console.log(totalCompletions);
+
+    const popularRoutines = await this.databaseServices.routinesOnUsers.groupBy(
+      {
+        by: ['routineId'],
+        _count: { routineId: true },
+        orderBy: { _count: { routineId: 'desc' } },
+      },
+    );
+
+    const popularRoutinesWithNames = await Promise.all(
+      popularRoutines.map(async (routine) => {
+        const routineData = await this.databaseServices.routines.findUnique({
+          where: { id: routine.routineId },
+          select: { name: true },
+        });
+        return {
+          routineName: routineData?.name,
+          count: routine._count.routineId,
+        };
+      }),
+    );
+
+    // Progress with user and routine names
+    const progress = await this.databaseServices.routinesOnUsers.findMany({
+      select: {
+        user: {
+          select: { username: true },
+        },
+        routine: {
+          select: { name: true },
+        },
+        progress: true,
+        completedTasks: true,
+      },
+    });
+
+    const progressWithDetails = progress.map((entry) => ({
+      username: entry.user.username,
+      routineName: entry.routine.name,
+      progress: entry.progress,
+      completedTasks: entry.completedTasks,
+    }));
+
+    return {
+      totalCompletions,
+      popularRoutines: popularRoutinesWithNames,
+      progress: progressWithDetails,
+    };
+  }
 }

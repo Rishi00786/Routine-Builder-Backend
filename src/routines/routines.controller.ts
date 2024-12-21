@@ -78,4 +78,10 @@ export class RoutinesController {
       completedTasks,
     );
   }
+
+  @Post('engagement')
+  async getEngagementInsights() {
+    // return 'hello';
+    return this.routineService.getEngagementInsights();
+  }
 }
