@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { CreateRoutineDTO } from './DTO/createRoutineDTO';
 import { plainToClass } from 'class-transformer';
+import { UpdateRoutineDTO } from './DTO/updateRoutineDTO';
 
 @Injectable()
 export class RoutinesService {
@@ -244,5 +245,35 @@ export class RoutinesService {
       popularRoutines: popularRoutinesWithNames,
       progress: progressWithDetails,
     };
+  }
+  async updateRoutine(id: string, updateRoutineDto: UpdateRoutineDTO) {
+    // Find the existing routine
+    const existingRoutine = await this.databaseServices.routines.findUnique({
+      where: { id },
+    });
+
+    if (!existingRoutine) {
+      throw new NotFoundException(`Routine with ID ${id} not found`);
+    }
+
+    // Transform steps into JSON-compatible objects, if provided
+    const updateData = {
+      ...updateRoutineDto,
+      steps: updateRoutineDto.steps
+        ? updateRoutineDto.steps.map((step) => ({
+            description: step.description,
+            product: {
+              'product-name': step.product['product-name'],
+              'product-desc': step.product['product-desc'],
+            },
+          }))
+        : undefined,
+    };
+
+    const updatedRoutine = await this.databaseServices.routines.update({
+      where: { id },
+      data: updateData,
+    });
+    return updatedRoutine;
   }
 }

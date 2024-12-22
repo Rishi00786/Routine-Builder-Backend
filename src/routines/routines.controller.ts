@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -10,6 +11,7 @@ import {
 import { RoutinesService } from './routines.service';
 import { CreateRoutineDTO } from './DTO/createRoutineDTO';
 import { AuthGuard } from 'src/auth/auth.gaurd';
+import { UpdateRoutineDTO } from './DTO/updateRoutineDTO';
 
 @Controller('routines')
 export class RoutinesController {
@@ -83,5 +85,21 @@ export class RoutinesController {
   async getEngagementInsights() {
     // return 'hello';
     return this.routineService.getEngagementInsights();
+  }
+
+  @Patch('update/:id')
+  async updateRoutine(
+    @Param('id') id: string,
+    @Body() updateRoutineDto: UpdateRoutineDTO,
+  ) {
+    const updatedRoutine = await this.routineService.updateRoutine(
+      id,
+      updateRoutineDto,
+    );
+
+    return {
+      message: 'Routine updated successfully',
+      updatedRoutine,
+    };
   }
 }
