@@ -3,10 +3,15 @@ import { DatabaseService } from 'src/database/database.service';
 import { CreateRoutineDTO } from './DTO/createRoutineDTO';
 import { plainToClass } from 'class-transformer';
 import { UpdateRoutineDTO } from './DTO/updateRoutineDTO';
+import * as moment from 'moment';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class RoutinesService {
-  constructor(private readonly databaseServices: DatabaseService) {}
+  constructor(
+    private readonly databaseServices: DatabaseService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async createRoutine(routine: CreateRoutineDTO) {
     const plainRoutine = plainToClass(CreateRoutineDTO, routine);
@@ -31,10 +36,6 @@ export class RoutinesService {
         preBuilt: plainRoutine.preBuilt ?? false,
       },
     });
-  }
-
-  async getAllRoutines() {
-    return await this.databaseServices.routines.findMany();
   }
 
   async getRoutineById(id: string) {
@@ -275,5 +276,53 @@ export class RoutinesService {
       data: updateData,
     });
     return updatedRoutine;
+  }
+
+  async checkAndNotifyMilestones() {
+    const userRoutines = await this.databaseServices.routinesOnUsers.findMany({
+      include: {
+        user: { select: { id: true, username: true } },
+        routine: { select: { id: true, name: true } },
+      },
+    });
+
+    const currentDate = new Date();
+
+    for (const userRoutine of userRoutines) {
+      const { user, routine, assignedAt } = userRoutine;
+      const diffInDays = moment(currentDate).diff(moment(assignedAt), 'days');
+
+      if (diffInDays === 3) {
+        await this.sendRoutineMilestoneNotification(user, routine, '3 days');
+      }
+
+      if (diffInDays === 7) {
+        await this.sendRoutineMilestoneNotification(user, routine, '1 week');
+      }
+
+      if (diffInDays === 14) {
+        await this.sendRoutineMilestoneNotification(user, routine, '2 weeks');
+      }
+    }
+  }
+
+  private async sendRoutineMilestoneNotification(
+    user: { id: string; username: string },
+    routine: { id: string; name: string },
+    milestone: string,
+  ) {
+    const message = `Hey ${user.username}, you've reached ${milestone} on your "${routine.name}" routine. Keep it up!`;
+
+    try {
+      await this.notificationService.sendNotification(user.id, message);
+      console.log(
+        `Notification sent to user ${user.username} for ${milestone} milestone.`,
+      );
+    } catch (error) {
+      console.error(
+        `Failed to send notification to user ${user.username}:`,
+        error,
+      );
+    }
   }
 }

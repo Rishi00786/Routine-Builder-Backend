@@ -13,9 +13,10 @@ import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
 import { AuthModule } from './auth/auth.module';
 import { JwtService } from '@nestjs/jwt';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
-  imports: [RoutinesModule, DatabaseModule, UserModule, AuthModule],
+  imports: [RoutinesModule, DatabaseModule, UserModule, AuthModule, NotificationModule],
   controllers: [
     AppController,
     RoutinesController,
