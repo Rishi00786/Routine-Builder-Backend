@@ -14,6 +14,7 @@ import { AuthService } from './auth/auth.service';
 import { AuthModule } from './auth/auth.module';
 import { JwtService } from '@nestjs/jwt';
 import { NotificationModule } from './notification/notification.module';
+import { NotificationService } from './notification/notification.service';
 
 @Module({
   imports: [RoutinesModule, DatabaseModule, UserModule, AuthModule, NotificationModule],
@@ -29,6 +30,7 @@ import { NotificationModule } from './notification/notification.module';
     DatabaseService,
     UserService,
     AuthService,
+    NotificationService
   ],
 })
 export class AppModule {}

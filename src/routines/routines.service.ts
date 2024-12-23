@@ -38,6 +38,10 @@ export class RoutinesService {
     });
   }
 
+  async getAllRoutines() {
+    return await this.databaseServices.routines.findMany();
+  }
+
   async getRoutineById(id: string) {
     return await this.databaseServices.routines.findUnique({ where: { id } });
   }
